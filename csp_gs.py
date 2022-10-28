@@ -204,7 +204,6 @@ class CSPSampler_static:
         sum_tt_bonus = sum(tt_bonus)
         tt_bonus = [b / sum_tt_bonus for b in tt_bonus]
 
-        # 根据每条路径的Length, 计算每条路径的length bonus
         # Calculate the length bonus for each path
         sigma_l = np.std(lengths)
         if sigma_l > 0.01:
@@ -216,14 +215,14 @@ class CSPSampler_static:
         length_bonus = [lb / sum_length_bonus for lb in length_bonus]
 
         opt_path_ind = 0
-        min_tt = tts[opt_path_ind]
-
+        max_pi = -np.inf
         for i in range(m):
-            if tts[i] < min_tt and lengths[i] < self.R + 0.001:
-                min_tt = tts[i]
+            pi = length_bonus[i] * self.lambda_rc + tt_bonus[i] * (1 - self.lambda_rc)
+            if pi > max_pi:
+                max_pi = pi
                 opt_path_ind = i
             for p in paths[i]:
-                score[p] += length_bonus[i] * self.lambda_rc + tt_bonus[i] * (1 - self.lambda_rc)
+                score[p] += pi
                 cnt[p] += 1
 
         # Save for the path score comparing
